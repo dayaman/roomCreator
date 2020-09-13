@@ -49,7 +49,7 @@ async def send_help_message(channel):
         message += '    '
         for p in option['patterns']:
             message += f'{p}  '
-        message += f'\n    {option['help']}'
+        message += f'\n    {option["help"]}'
         message += '\n\n'
     return await channel.send(f'オプションヘルプを表示します。\n{message}', delete_after=30)
 
