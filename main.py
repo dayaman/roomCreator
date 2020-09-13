@@ -14,20 +14,20 @@ SPOTS = {
 
 options = {
         'WORLDS_EDGE':{
-            'help':"命名テーブルをWorldsEdge基準に設定",
-            'patterns':[r"-w",r"--worlds_edge"]
+            'help':'命名テーブルをWorldsEdge基準に設定',
+            'patterns':[r'-w',r'--worlds_edge']
         },
         'KINGS_CANYON':{
-            'help':"命名テーブルをKingsCanyon基準に設定",
-            'patterns':[r"-k",r"--kings_canyon"]
+            'help':'命名テーブルをKingsCanyon基準に設定',
+            'patterns':[r'-k',r'--kings_canyon']
         },
         'WEAPONS':{
-            'help':"命名テーブルをWeapons基準に設定",
-            'patterns':[r"-p",r"--weapons"]
+            'help':'命名テーブルをWeapons基準に設定',
+            'patterns':[r'-p',r'--weapons']
         },
         'HELP':{
-            'help':"ヘルプを表示",
-            'patterns':[r"-h",r"--help"]
+            'help':'ヘルプを表示',
+            'patterns':[r'-h',r'--help']
         }
     }
 
@@ -35,22 +35,22 @@ def param_parser(string):
     for key in options:
         reg_list = options[key]['patterns']
         for r in reg_list:
-            reg = re.compile(r + "$",re.I) # 大文字小文字の区別を無効
+            reg = re.compile(r + '$',re.I) # 大文字小文字の区別を無効
             if reg.search(string):
                 return key
 
     return None
 
 async def send_help_message(channel):
-    message = ""
+    message = ''
     for key in options:
         option = options[key]
-        message += f"{key}:\n"
-        message += "    "
+        message += f'{key}:\n'
+        message += '    '
         for p in option['patterns']:
-            message += f"{p}  "
-        message += f"\n    {option['help']}"
-        message += "\n\n"
+            message += f'{p}  '
+        message += f'\n    {option['help']}'
+        message += '\n\n'
     return await channel.send(f'オプションヘルプを表示します。\n{message}', delete_after=30)
 
 @client.event
@@ -73,7 +73,7 @@ async def on_message(message):
         overwrites[role] = discord.PermissionOverwrite(view_channel=True)
 
     option = param_parser(message.content)
-    if option == "HELP":
+    if option == 'HELP':
         return await send_help_message(message.channel)
 
     if option is not None:
@@ -90,9 +90,9 @@ async def on_message(message):
 
     model.add_category(str(ctgr.id))
 
-    resp_message = f"{tx_ch.mention}を作りました。"
+    resp_message = f'{tx_ch.mention}を作りました。'
     if option is not None:
-        resp_message += f"({option})"
+        resp_message += f'({option})'
 
     await message.channel.send(resp_message, delete_after=30)
     await check(message.guild, ctgr)
