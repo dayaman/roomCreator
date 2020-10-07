@@ -99,13 +99,6 @@ async def on_message(message):
 
 @client.event
 async def on_voice_state_update(member, before, after):
-    '''
-    1. ボイチャに参加 (before=false, after=true)
-    2. ボイチャを移動 残り数名 (before=true, after=true, num=1)
-    4. ボイチャから退室 残り数名 (before=true, after=false, num=1)
-    3. ボイチャを移動 残り0名 (before=true, after=true, num=0)
-    5. ボイチャから退室 残り0名 (before=true, after=false, num=0)
-    '''
     # 移動前がNoneなら返す
     if before.channel is None:
         return
