@@ -1,62 +1,72 @@
 import random
+from typing import List, Union
 import discord
 import model
-import dsctoken
 import re
+import yaml
+
+with open('config.yaml') as file:
+    config = yaml.safe_load(file)
+
+with open('template.yaml') as file:
+    template = yaml.safe_load(file)
 
 client = discord.Client()
 
 SPOTS = {
-    'WORLDS_EDGE':['試練', 'スカイフック', '調査キャンプ', '製錬所', 'カウントダウン', 'エピセンター', 'フラグメント', '列車庫', '溶岩湖', 'ハーベスター', '仕分け工場', 'ラバシティー', '火力発電所', 'ザ・ツリー', 'ザ・ドーム', '展望', '発射場', '間欠泉'],
-    'KINGS_CANYON':['砲台','両椎','ファーム','リレー','湿地','沼沢','ブリッジ','ハイドロダム','リパルサー','リバーズエンド','南監視塔','水処理施設','マーケット','東居住区','南居住区','スカルタウン','サンダードーム','西居住区','ゴールデンサンズ','クロスロード','航空基地','リバーセンター','ハイデザート','バンカー','ランオフ','オアシス','ザ・ピット','スラムレイク','カスケーズ','北監視塔','ザ・ケージ','収容所','丘陵前線基地','サルベージ','キャパシター','マップルーム'],
-    'WEAPONS':['フラットライン','G7スカウト','ヘムロック','R-301','ハボック','オルタネーター','プラウラー','R-99','ボルト','ディヴォーション','スピットファイア','L-スター','ロングボウ','クレーバー','トリプルテイク','センチネル','チャージライフル','EVA-8オート','マスティフ','モザンビーク','ピースキーパー','P2020','RE-45','ウィングマン'],
-    'OLYMPUS':['造船所','母艦','ドック','桟橋','貨物倉','送電網','第二送電網','リフト','中央フェーズゲートウェイ','西フェーズゲートウェイ','補給線','アンティチャンバー','タービン','メンテナンス','滝つぼ研究所','エネルギー貯蔵庫','アンダーパス','ガーデン','東発電所','ウェルカムセンター','グロータワー','象牙の道','軌道砲','ディフェンスペリメーター','南発電所','ソーラーアレイ','クロスロード','ハモンド研究所','研究所別棟','盆栽プラザ','盆栽ヒルサイド','水耕施設','農場入口','エリジウム','西発電所','農場','エステート','野草地','オアシス','かんがいプラットフォーム','オアシスヴィラ']
+    'WORLDS_EDGE': ['試練', 'スカイフック', '調査キャンプ', '製錬所', 'カウントダウン', 'エピセンター', 'フラグメント', '列車庫', '溶岩湖', 'ハーベスター', '仕分け工場', 'ラバシティー', '火力発電所', 'ザ・ツリー', 'ザ・ドーム', '展望', '発射場', '間欠泉'],
+    'KINGS_CANYON': ['砲台', '両椎', 'ファーム', 'リレー', '湿地', '沼沢', 'ブリッジ', 'ハイドロダム', 'リパルサー', 'リバーズエンド', '南監視塔', '水処理施設', 'マーケット', '東居住区', '南居住区', 'スカルタウン', 'サンダードーム', '西居住区', 'ゴールデンサンズ', 'クロスロード', '航空基地', 'リバーセンター', 'ハイデザート', 'バンカー', 'ランオフ', 'オアシス', 'ザ・ピット', 'スラムレイク', 'カスケーズ', '北監視塔', 'ザ・ケージ', '収容所', '丘陵前線基地', 'サルベージ', 'キャパシター', 'マップルーム'],
+    'WEAPONS': ['フラットライン', 'G7スカウト', 'ヘムロック', 'R-301', 'ハボック', 'オルタネーター', 'プラウラー', 'R-99', 'ボルト', 'ディヴォーション', 'スピットファイア', 'L-スター', 'ロングボウ', 'クレーバー', 'トリプルテイク', 'センチネル', 'チャージライフル', 'EVA-8オート', 'マスティフ', 'モザンビーク', 'ピースキーパー', 'P2020', 'RE-45', 'ウィングマン'],
+    'OLYMPUS': ['造船所', '母艦', 'ドック', '桟橋', '貨物倉', '送電網', '第二送電網', 'リフト', '中央フェーズゲートウェイ', '西フェーズゲートウェイ', '補給線', 'アンティチャンバー', 'タービン', 'メンテナンス', '滝つぼ研究所', 'エネルギー貯蔵庫', 'アンダーパス', 'ガーデン', '東発電所', 'ウェルカムセンター', 'グロータワー', '象牙の道', '軌道砲', 'ディフェンスペリメーター', '南発電所', 'ソーラーアレイ', 'クロスロード', 'ハモンド研究所', '研究所別棟', '盆栽プラザ', '盆栽ヒルサイド', '水耕施設', '農場入口', 'エリジウム', '西発電所', '農場', 'エステート', '野草地', 'オアシス', 'かんがいプラットフォーム', 'オアシスヴィラ']
 }
 
-options = {
-        'WORLDS_EDGE':{
-            'help':'命名テーブルをWorldsEdge基準に設定',
-            'patterns':[r'-w',r'--worlds_edge']
-        },
-        'KINGS_CANYON':{
-            'help':'命名テーブルをKingsCanyon基準に設定',
-            'patterns':[r'-k',r'--kings_canyon']
-        },
-        'WEAPONS':{
-            'help':'命名テーブルをWeapons基準に設定',
-            'patterns':[r'-p',r'--weapons']
-        },
-        'OLYMPUS':{
-            'help':'命名テーブルをOlympus基準に設定',
-            'patterns':[r'-o',r'--olympus']
-        },
-        'HELP':{
-            'help':'ヘルプを表示',
-            'patterns':[r'-h',r'--help']
-        }
+template = {
+    'WORLDS_EDGE': {
+        'help': '命名テーブルをWorldsEdge基準に設定',
+        'patterns': [r'-w', r'--worlds_edge']
+    },
+    'KINGS_CANYON': {
+        'help': '命名テーブルをKingsCanyon基準に設定',
+        'patterns': [r'-k', r'--kings_canyon']
+    },
+    'WEAPONS': {
+        'help': '命名テーブルをWeapons基準に設定',
+        'patterns': [r'-p', r'--weapons']
+    },
+    'OLYMPUS': {
+        'help': '命名テーブルをOlympus基準に設定',
+        'patterns': [r'-o', r'--olympus']
+    },
+    'HELP': {
+        'help': 'ヘルプを表示',
+        'patterns': [r'-h', r'--help']
     }
+}
+
 
 def param_parser(string):
-    for key in options:
-        reg_list = options[key]['patterns']
+    for key in template:
+        reg_list = template[key]['patterns']
         for r in reg_list:
-            reg = re.compile(r + '$',re.I) # 大文字小文字の区別を無効
+            reg = re.compile(r + '$', re.I)  # 大文字小文字の区別を無効
             if reg.search(string):
                 return key
 
     return None
 
+
 async def send_help_message(channel):
     message = ''
-    for key in options:
-        option = options[key]
+    for key in template:
+        option = template[key]
         message += f'{key}:\n'
         message += '    '
-        for p in option['patterns']:
+        for p in flat_list(option['alias']):
             message += f'{p}  '
         message += f'\n    {option["help"]}'
         message += '\n\n'
     return await channel.send(f'オプションヘルプを表示します。\n{message}', delete_after=30)
+
 
 @client.event
 async def on_message(message):
@@ -65,10 +75,10 @@ async def on_message(message):
 
     if not message.role_mentions:
         return
-        
+
     if not str(message.channel.id) == model.get_recuit(str(message.guild.id)).channel_id:
         return
-    
+
     overwrites = {
         message.guild.default_role: discord.PermissionOverwrite(view_channel=False),
         message.guild.me: discord.PermissionOverwrite(view_channel=True)
@@ -84,8 +94,7 @@ async def on_message(message):
     if option is not None:
         table = SPOTS[option]
     else:
-        (key,table) = random.choice(list(SPOTS.items()))
-
+        (key, table) = random.choice(list(SPOTS.items()))
 
     spot = random.choice(table)
 
@@ -102,6 +111,7 @@ async def on_message(message):
     await message.channel.send(resp_message, delete_after=30)
     await check(message.guild, ctgr)
 
+
 @client.event
 async def on_voice_state_update(member, before, after):
     # 移動前がNoneなら返す
@@ -112,15 +122,16 @@ async def on_voice_state_update(member, before, after):
     ctgr = before.channel.category
     if ctgr is None:
         return
-    
+
     # 移動前のチャンネルに人がいたら返す
     if before.channel.members:
         return
 
     # このBotが作成したカテゴリなら削除
-    db_ids = [ category.category_id for category in model.get_categories()]
+    db_ids = [category.category_id for category in model.get_categories()]
     if str(ctgr.id) in db_ids:
         await delete_channel(ctgr)
+
 
 async def delete_channel(ctgr):
     for channel in ctgr.channels:
@@ -129,15 +140,17 @@ async def delete_channel(ctgr):
     await ctgr.delete()
     model.delete_category(str(ctgr_id))
 
+
 async def check(guild, ex_ctgr):
     for ctgr in guild.categories:
         if ctgr == ex_ctgr:
             continue
-        db_ids = [ category.category_id for category in model.get_categories()]
+        db_ids = [category.category_id for category in model.get_categories()]
         if str(ctgr.id) in db_ids:
             for vc in ctgr.voice_channels:
                 if not vc.members:
                     await delete_channel(ctgr)
+
 
 @client.event
 async def on_guild_join(guild):
@@ -156,4 +169,4 @@ async def on_guild_join(guild):
 
             model.change_recuit(str(guild.id), str(tx_ch.id))
 
-client.run(dsctoken.tkn)
+client.run(config.get("discord_token"))
