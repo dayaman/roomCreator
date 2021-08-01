@@ -2,7 +2,7 @@ from sqlalchemy import create_engine, Column, String, Date
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-engine = create_engine('sqlite:///apex_db.sqlite3')
+engine = create_engine('sqlite:///room_creator.sqlite3')
 SessionClass = sessionmaker(engine)
 session=SessionClass()
 
