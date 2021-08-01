@@ -1,2 +1,4 @@
-discord_token:
+discord_token: "abcdef..."
 recuitment_room: "ぼしゅー"
+recuitment_category: "room-creator"
+create_room_message: "{}を作ったでぃ！"
