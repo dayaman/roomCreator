@@ -1,4 +1,5 @@
 dsctoken.py
+memo.*
 *.sqlite3
 /__pycache__
 /.vscode

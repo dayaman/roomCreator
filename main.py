@@ -91,7 +91,7 @@ async def on_message(message):
 
     ctgr = await message.guild.create_category(spot, overwrites=overwrites)
     tx_ch = await ctgr.create_text_channel(name='チャット')
-    await ctgr.create_voice_channel(name='わいわい')
+    await ctgr.create_voice_channel(name='わいわい',bitrate=int(message.guild.bitrate_limit))
 
     model.add_category(str(ctgr.id))
 
